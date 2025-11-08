@@ -1,6 +1,7 @@
 # CourseBuddy 📚
 
-AI-powered course planning for university students. 🗓️
+AI-powered course planning for UBC students. 🗓️
+Try it out yourself: coursebuddyubc.ca
 
 ## Overview
 
@@ -29,7 +30,7 @@ I’m still learning this stack, but I can walk through the main architecture an
 - 🧵 Prerequisite and pathway planning views
 - 🔐 Auth + saved personal schedules via Supabase
 
-## Tech Stack
+## Full Tech Stack
 
 **Frontend**
 - React 18
@@ -50,7 +51,7 @@ I’m still learning this stack, but I can walk through the main architecture an
   - Realtime
 
 **AI**
-- OpenAI GPT for schedule suggestions and conversational support
+- Gemini 2.5 Flash through Lovable Cloud for schedule suggestions and conversational support
 
 ## Getting Started
 

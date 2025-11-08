@@ -1,4 +1,4 @@
-# CourseBuddy
+# CourseBuddy 📚
 
 AI-powered course planning for university students. 🗓️
 

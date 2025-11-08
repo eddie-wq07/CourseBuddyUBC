@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Dark futuristic theme - always dark mode */
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 4%;
+    --primary-glow: 217 91% 70%;
+
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 12%;
+    --muted-foreground: 210 40% 98%;
+
+    --accent: 199 89% 48%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    /* Neon gradient colors */
+    --gradient-start: 217 91% 60%;
+    --gradient-end: 199 89% 48%;
+    --neon-blue: 217 91% 60%;
+    --neon-cyan: 199 89% 48%;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 4%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  .dark {
+    /* Same dark theme for consistency */
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 4%;
+    --primary-glow: 217 91% 70%;
+
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 12%;
+    --muted-foreground: 210 40% 98%;
+
+    --accent: 199 89% 48%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 4%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+/* Aurora background animation */
+@keyframes aurora-flow {
+  0%, 100% {
+    transform: translateX(-30%) translateY(0%) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(30%) translateY(-10%) scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aurora-flow-2 {
+  0%, 100% {
+    transform: translateX(20%) translateY(10%) scale(1.1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-20%) translateY(-5%) scale(1.3);
+    opacity: 0.5;
+  }
+}
+
+@keyframes aurora-flow-3 {
+  0%, 100% {
+    transform: translateX(-10%) translateY(-5%) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(40%) translateY(8%) scale(1.15);
+    opacity: 0.55;
+  }
+}
+
+.aurora-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.aurora-bg::before,
+.aurora-bg::after,
+.aurora-bg .aurora-layer {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.aurora-bg::before {
+  background: radial-gradient(ellipse at center, hsl(var(--neon-blue) / 0.4) 0%, transparent 70%);
+  top: -25%;
+  left: -50%;
+  animation: aurora-flow 15s ease-in-out infinite;
+}
+
+.aurora-bg::after {
+  background: radial-gradient(ellipse at center, hsl(var(--neon-cyan) / 0.35) 0%, transparent 70%);
+  top: -15%;
+  left: -60%;
+  animation: aurora-flow-2 18s ease-in-out infinite;
+}
+
+.aurora-layer {
+  background: radial-gradient(ellipse at center, hsl(var(--accent) / 0.3) 0%, transparent 70%);
+  top: -20%;
+  left: -55%;
+  animation: aurora-flow-3 20s ease-in-out infinite;
+}

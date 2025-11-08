@@ -1,0 +1,7 @@
+project_id = "qpknyrzhtjecbwuaovwg"
+
+[functions.fetch-courses]
+verify_jwt = false
+
+[functions.report-issue]
+verify_jwt = false

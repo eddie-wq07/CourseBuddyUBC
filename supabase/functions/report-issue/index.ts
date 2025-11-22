@@ -85,10 +85,11 @@ const handler = async (req: Request): Promise<Response> => {
         ...corsHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in report-issue function:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to send issue report";
     return new Response(
-      JSON.stringify({ error: error.message || "Failed to send issue report" }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

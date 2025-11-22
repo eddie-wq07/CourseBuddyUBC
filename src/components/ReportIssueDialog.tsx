@@ -70,11 +70,12 @@ export function ReportIssueDialog({ open, onOpenChange }: ReportIssueDialogProps
       setEmail("");
       setIssue("");
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting issue:", error);
+      const errorMessage = error instanceof Error ? error.message : "Please try again later";
       toast({
         title: "Failed to submit issue",
-        description: error.message || "Please try again later",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -57,12 +57,12 @@ const Index = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [loadingPhrase] = useState(() => loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // AI Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentChatInput, setCurrentChatInput] = useState("");
   const [isProcessingChat, setIsProcessingChat] = useState(false);
-  
+
   // History management
   const [history, setHistory] = useState<ScheduledCourse[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -96,14 +96,14 @@ const Index = () => {
     if (session?.user) {
       const timer = setTimeout(async () => {
         setShowWelcome(false);
-        
+
         // Check if user has seen tutorial from database
         const { data: profile } = await supabase
           .from('profiles')
           .select('has_seen_tutorial')
           .eq('id', session.user.id)
           .maybeSingle();
-        
+
         if (profile && !profile.has_seen_tutorial) {
           setShowTutorial(true);
         }
@@ -118,7 +118,7 @@ const Index = () => {
         .from('profiles')
         .update({ has_seen_tutorial: true })
         .eq('id', session.user.id);
-      
+
       setShowTutorial(false);
       toast.success("Tutorial completed! You're all set!");
     }
@@ -130,7 +130,7 @@ const Index = () => {
         .from('profiles')
         .update({ has_seen_tutorial: true })
         .eq('id', session.user.id);
-      
+
       setShowTutorial(false);
       toast.info("Tutorial skipped");
     }
@@ -156,8 +156,8 @@ const Index = () => {
     if (data && data.length > 0) {
       // If no specific schedule name, load the most recent one
       const scheduleToLoad = scheduleName || data[0].schedule_name;
-      const filteredData = scheduleName 
-        ? data 
+      const filteredData = scheduleName
+        ? data
         : data.filter(item => item.schedule_name === scheduleToLoad);
 
       const loadedSchedule: ScheduledCourse[] = filteredData.map(item => ({
@@ -168,7 +168,7 @@ const Index = () => {
         status: item.status,
         color: item.color,
       }));
-      
+
       setScheduledCourses(loadedSchedule);
       setHistory([loadedSchedule]);
       setHistoryIndex(0);
@@ -181,31 +181,31 @@ const Index = () => {
     setCurrentScheduleName(scheduleName);
     setHistory([courses]);
     setHistoryIndex(0);
-    
+
     // Rebuild selectedCoursesMap from loaded schedule so AI can modify it
     if (availableCourses && courses.length > 0) {
       const newMap = new Map<string, Map<CourseType, Course>>();
-      
+
       courses.forEach(scheduledCourse => {
         const matchingCourse = availableCourses.find(
-          c => c.course_code === scheduledCourse.name && 
-               c.section === scheduledCourse.section
+          c => c.course_code === scheduledCourse.name &&
+            c.section === scheduledCourse.section
         );
-        
+
         if (matchingCourse) {
           const courseType = getCourseType(matchingCourse.section);
-          
+
           if (!newMap.has(matchingCourse.course_code)) {
             newMap.set(matchingCourse.course_code, new Map());
           }
-          
+
           const typeMap = newMap.get(matchingCourse.course_code);
           if (typeMap && !typeMap.has(courseType)) {
             typeMap.set(courseType, matchingCourse);
           }
         }
       });
-      
+
       setSelectedCoursesMap(newMap);
     }
   };
@@ -320,7 +320,7 @@ const Index = () => {
 
   const handleGenerateSchedule = (selectedCourses: Course[], coursesMap: Map<string, Map<CourseType, Course>>) => {
     setSelectedCoursesMap(coursesMap);
-    
+
     const schedule: ScheduledCourse[] = [];
     const colors = ["purple", "green", "tan", "orange", "blue"];
     const courseColorMap = new Map<string, string>();
@@ -358,60 +358,60 @@ const Index = () => {
     const draggedCourse = scheduledCourses.find(
       c => `${c.name}-${c.section}-${c.day}-${c.time}` === event.active.id
     );
-    
+
     if (!draggedCourse || !availableCourses) return;
-    
+
     setDraggingCourse(draggedCourse);
-    
+
     // Find all alternative sections for this course
     const courseType = getCourseType(draggedCourse.section!);
-    const alternatives = availableCourses.filter((course: Course) => 
-      course.course_code === draggedCourse.name && 
+    const alternatives = availableCourses.filter((course: Course) =>
+      course.course_code === draggedCourse.name &&
       getCourseType(course.section) === courseType
     );
-    
+
     setAvailableAlternatives(alternatives);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     setDraggingCourse(null);
     setAvailableAlternatives([]);
-    
+
     if (!over || !draggingCourse) return;
-    
+
     // Parse the drop zone ID: "drop-{day}-{time}"
     const dropId = over.id as string;
     if (!dropId.startsWith('drop-')) return;
-    
+
     const [, targetDay, targetTime] = dropId.split('-');
-    
+
     // Find the alternative course that matches this time slot
-    const newCourse = availableAlternatives.find((course: Course) => 
-      course.days?.includes(targetDay.toUpperCase()) && 
+    const newCourse = availableAlternatives.find((course: Course) =>
+      course.days?.includes(targetDay.toUpperCase()) &&
       course.time_start === targetTime
     );
-    
+
     if (!newCourse) {
       toast.error("No section available for this time slot");
       return;
     }
-    
+
     // Update the selected courses map
     const newMap = new Map(selectedCoursesMap);
     const courseType = getCourseType(draggingCourse.section!);
     const courseMap = newMap.get(draggingCourse.name);
-    
+
     if (courseMap) {
       courseMap.set(courseType, newCourse);
-      
+
       // Regenerate schedule
       const allCourses: Course[] = [];
       newMap.forEach(typeMap => {
         typeMap.forEach(course => allCourses.push(course));
       });
-      
+
       handleGenerateSchedule(allCourses, newMap);
       toast.success(`Switched to section ${newCourse.section}`);
     }
@@ -428,7 +428,7 @@ const Index = () => {
     setChatMessages(prev => [...prev, userMessage]);
     setCurrentChatInput("");
     setIsProcessingChat(true);
-    
+
     try {
       // Convert selectedCourses to array for AI
       const selectedCoursesArray: Course[] = [];
@@ -459,22 +459,28 @@ const Index = () => {
       // Apply changes if any
       if (data.changes && data.changes.length > 0) {
         const newSelectedCourses = new Map(selectedCoursesMap);
-        
-        data.changes.forEach((change: any) => {
+
+        interface ScheduleChange {
+          courseCode: string;
+          oldSection: string;
+          newSection: string;
+        }
+
+        data.changes.forEach((change: ScheduleChange) => {
           const courseCode = change.courseCode;
           const oldSection = change.oldSection;
           const newSection = change.newSection;
-          
+
           const oldCourse = selectedCoursesArray.find(
             c => c.course_code === courseCode && c.section === oldSection
           );
-          
+
           if (oldCourse) {
             const courseType = getCourseType(oldCourse.section);
             const newCourse = availableCourses?.find(
               c => c.course_code === courseCode && c.section === newSection
             );
-            
+
             if (newCourse) {
               const typeMap = newSelectedCourses.get(courseCode);
               if (typeMap) {
@@ -483,14 +489,14 @@ const Index = () => {
             }
           }
         });
-        
+
         const updatedCourses: Course[] = [];
         newSelectedCourses.forEach(typeMap => {
           typeMap.forEach(course => {
             updatedCourses.push(course);
           });
         });
-        
+
         handleGenerateSchedule(updatedCourses, newSelectedCourses);
         toast.success("Schedule updated based on your request");
       }
@@ -518,7 +524,7 @@ const Index = () => {
             </p>
           </div>
         )}
-        <Header 
+        <Header
           onSaveSchedule={() => setSaveDialogOpen(true)}
           onLoadSchedule={() => setLoadDialogOpen(true)}
           onClearSchedule={handleClearSchedule}
@@ -541,7 +547,7 @@ const Index = () => {
                     <SheetTitle>Course Selection</SheetTitle>
                   </SheetHeader>
                   <div className="h-[calc(100vh-80px)] overflow-hidden">
-                    <Sidebar 
+                    <Sidebar
                       onGenerateSchedule={(courses, map) => {
                         handleGenerateSchedule(courses, map);
                         setSidebarOpen(false);
@@ -555,7 +561,7 @@ const Index = () => {
                 </SheetContent>
               </Sheet>
               <div className="flex-1">
-                <ScheduleGrid 
+                <ScheduleGrid
                   scheduledCourses={scheduledCourses}
                   draggingCourse={draggingCourse}
                   availableAlternatives={availableAlternatives}
@@ -569,14 +575,14 @@ const Index = () => {
             </>
           ) : (
             <>
-              <Sidebar 
+              <Sidebar
                 onGenerateSchedule={handleGenerateSchedule}
                 onRemoveCourseFromSchedule={handleRemoveCourseFromSchedule}
                 onClearSchedule={handleClearSchedule}
                 term={term}
                 setTerm={setTerm}
               />
-              <ScheduleGrid 
+              <ScheduleGrid
                 scheduledCourses={scheduledCourses}
                 draggingCourse={draggingCourse}
                 availableAlternatives={availableAlternatives}
@@ -598,14 +604,14 @@ const Index = () => {
           )}
         </div>
         {!isMobile && <Footer />}
-        
+
         <SaveScheduleDialog
           open={saveDialogOpen}
           onOpenChange={setSaveDialogOpen}
           scheduledCourses={scheduledCourses}
           currentScheduleName={currentScheduleName}
         />
-        
+
         <LoadScheduleDialog
           open={loadDialogOpen}
           onOpenChange={setLoadDialogOpen}
@@ -619,7 +625,7 @@ const Index = () => {
             onSkip={handleTutorialSkip}
           />
         )}
-        
+
         <DragOverlay dropAnimation={null}>
           {draggingCourse && (
             <div className={cn(

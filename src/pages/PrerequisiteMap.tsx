@@ -64,19 +64,14 @@ const PrerequisiteMap = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  useEffect(() => {
-    checkAuth();
-    fetchSchedules();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate('/auth');
     }
-  };
+  }, [navigate]);
 
-  const fetchSchedules = async () => {
+  const fetchSchedules = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -109,19 +104,24 @@ const PrerequisiteMap = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+    fetchSchedules();
+  }, [checkAuth, fetchSchedules]);
 
   const buildPrerequisiteTree = useCallback((courses: string[]) => {
     const nodeMap = new Map<string, Node>();
     const edgeList: Edge[] = [];
     const visited = new Set<string>();
-    
+
     const addNode = (courseCode: string, level: number, isUserCourse: boolean = false) => {
       if (visited.has(courseCode)) return;
       visited.add(courseCode);
 
       const unlockedCourses = courseUnlocksData[courseCode] || [];
-      
+
       // Add current node
       if (!nodeMap.has(courseCode)) {
         nodeMap.set(courseCode, {
@@ -239,7 +239,7 @@ const PrerequisiteMap = () => {
     const graduationY = (maxLevel + 1) * 120 + 60;
     positionedNodes.push({
       id: 'graduation',
-      data: { 
+      data: {
         label: '🎓 Congratulations! You Graduate! 🎓'
       },
       position: { x: -200, y: graduationY },
@@ -279,7 +279,7 @@ const PrerequisiteMap = () => {
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Course Progression Map</CardTitle>
             <CardDescription className="text-sm">
-              Select a saved schedule to see your prerequisite pathway. Your completed courses (blue) are shown at the top. 
+              Select a saved schedule to see your prerequisite pathway. Your completed courses (blue) are shown at the top.
               Locked courses (gray) flow downward - you must complete the courses above them to unlock them.
             </CardDescription>
           </CardHeader>

@@ -13,7 +13,7 @@ serve(async (req) => {
 
   try {
     const { messages, selectedCourses, allCourses } = await req.json();
-    
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not set');
@@ -68,10 +68,10 @@ Rules:
 - If user has no courses selected, focus on helping them explore options`;
 
     // Convert chat messages to API format
-    const apiMessages = messages.map((msg: any) => ({
+    const apiMessages = messages.map((msg: { role: string; content: string }) => ({
       role: msg.role,
-      content: msg.role === 'user' 
-        ? msg.content 
+      content: msg.role === 'user'
+        ? msg.content
         : msg.content
     }));
 
@@ -79,7 +79,7 @@ Rules:
     const hasSchedule = selectedCourses && selectedCourses.length > 0;
     const contextMessage = {
       role: 'user',
-      content: hasSchedule 
+      content: hasSchedule
         ? `Current schedule context:
 Selected courses: ${JSON.stringify(selectedCourses, null, 2)}
 
@@ -96,7 +96,7 @@ Please respond to my latest message about available courses.`
     };
 
     console.log('Calling Lovable AI for schedule chat...');
-    
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -122,15 +122,15 @@ Please respond to my latest message about available courses.`
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
-    
+
     console.log('AI Response:', aiResponse);
-    
+
     // Parse the AI response
     let result;
     try {
       // Try to extract JSON from markdown code blocks if present
-      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/) || 
-                       aiResponse.match(/```\s*([\s\S]*?)\s*```/);
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/) ||
+        aiResponse.match(/```\s*([\s\S]*?)\s*```/);
       const jsonStr = jsonMatch ? jsonMatch[1] : aiResponse;
       result = JSON.parse(jsonStr);
     } catch (parseError) {
@@ -143,7 +143,7 @@ Please respond to my latest message about available courses.`
     });
   } catch (error) {
     console.error('Error in optimize-schedule-ai function:', error);
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       error: error instanceof Error ? error.message : 'Unknown error',
       response: 'Sorry, I encountered an error. Please try again.',
       changes: []

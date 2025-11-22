@@ -23,7 +23,7 @@ interface Course {
 
 // All major UBC subjects to fetch
 const UBC_SUBJECTS = [
-  'CPSC', 'MATH', 'PHYS', 'CHEM', 'BIOL', 'ECON', 'PSYC', 'HIST', 'ENGL', 
+  'CPSC', 'MATH', 'PHYS', 'CHEM', 'BIOL', 'ECON', 'PSYC', 'HIST', 'ENGL',
   'COMM', 'STAT', 'PHIL', 'POLI', 'SOCI', 'GEOG', 'ANTH', 'ASIA', 'CLST',
   'FREN', 'GERM', 'SPAN', 'JAPN', 'CHIN', 'MUSC', 'THTR', 'FINA', 'ARTH',
   'CIVL', 'MECH', 'ELEC', 'CHBE', 'MTRL', 'MINE', 'BMEG', 'CPEN', 'ENPH',
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
     // Read term and optional refresh/subjects from request body or query
     const body = await req.json().catch(() => ({}));
-    const { term = '2025W', refresh: refreshFromBody, subjects: subjectsFromBody } = body as any;
+    const { term = '2025W', refresh: refreshFromBody, subjects: subjectsFromBody } = body as { term?: string; refresh?: boolean; subjects?: string[] };
     const forceRefresh = new URL(req.url).searchParams.get('refresh') === 'true' || !!refreshFromBody;
     const subjects: string[] = Array.isArray(subjectsFromBody) && subjectsFromBody.length
       ? subjectsFromBody.map((s: string) => s.toUpperCase())
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
 
     // Check if we have cached data (unless force refresh)
     if (!forceRefresh) {
-      const cachedCourses: any[] = [];
+      const cachedCourses: Course[] = [];
       const pageSize = 1000;
       let from = 0;
       while (true) {
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
           .range(from, from + pageSize - 1);
 
         if (error) break;
-        if (data && data.length) cachedCourses.push(...data);
+        if (data && data.length) cachedCourses.push(...(data as unknown as Course[]));
         if (!data || data.length < pageSize) break;
         from += pageSize;
       }
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch all courses from database to return
-    const allStoredCourses: any[] = [];
+    const allStoredCourses: Course[] = [];
     {
       const pageSize = 1000;
       let from = 0;
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
           break;
         }
 
-        if (data && data.length) allStoredCourses.push(...data);
+        if (data && data.length) allStoredCourses.push(...(data as unknown as Course[]));
         if (!data || data.length < pageSize) break;
         from += pageSize;
       }
@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in fetch-courses function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
@@ -294,7 +294,7 @@ async function scrapeCourses(subject: string, term: string): Promise<Course[]> {
       let placeholderDays: string[];
       let placeholderStart: string;
       let placeholderEnd: string;
-      
+
       if (sectionUpper.startsWith('L')) {
         // Labs typically once a week
         placeholderDays = ['FRI'];
